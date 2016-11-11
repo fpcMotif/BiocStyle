@@ -4,6 +4,7 @@ html_document2 <- function(toc = TRUE,
                            fig_height = NA,
                            fig_retina = NULL,
                            css = NULL,
+                           pandoc_args = NULL,
                            ...) {
   
   ## load the package to expose macros
@@ -83,8 +84,26 @@ html_document2 <- function(toc = TRUE,
     css = css,
     ...)
   
-  template_arg = which(rmarkdown_html_document$pandoc$args == "--template") + 1L
-  rmarkdown_html_document$pandoc$args[template_arg] = template
+  ## override some default pandoc args; we use this low-level approach rather 
+  ## than passing them in 'pandoc_args' to 'rmarkdown::html_document' because 
+  ## rmarkdown just concatenates base and overlay argument lists which does not 
+  ## allow for substitution
+  pandoc_args = c(pandoc_args, c("--template", template))
+  
+  arg_names <- c("--email-obfuscation", "--template")
+  arg_names <- arg_names[arg_names %in% pandoc_args]
+  
+  idx = match(arg_names, pandoc_args)
+  
+  ## substitute arguments
+  rmarkdown_html_document$pandoc$args [
+    match(arg_names, rmarkdown_html_document$pandoc$args) + 1L
+  ] <- pandoc_args [idx + 1L]
+  
+  ## append the rest
+  rmarkdown_html_document$pandoc$args <- 
+    c(rmarkdown_html_document$pandoc$args, pandoc_args[-c(idx, idx+1L)])
+  
   
   rmarkdown::output_format(
     knitr = knitr,
