@@ -113,7 +113,7 @@ html_document2 <- function(toc = TRUE,
     base_format = rmarkdown_html_document)
   }
 
-  bookdown:::html_document_alt(
+  bookdown::html_document2(
     base_format = base_format,
     toc = toc,
     number_sections = FALSE,
